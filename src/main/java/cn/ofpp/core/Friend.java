@@ -1,10 +1,9 @@
 package cn.ofpp.core;
 
-import cn.hutool.core.date.DateField;
-import cn.hutool.core.date.DateTime;
-import cn.hutool.core.date.DateUnit;
-import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.*;
+import org.checkerframework.checker.units.qual.C;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import static cn.hutool.core.date.DateUtil.age;
@@ -27,23 +26,28 @@ public class Friend {
 
     private final String birthday;
 
+    private final boolean chineseDate;
+
     private final String loveTime;
 
     private final String sex;
 
     private final String templateId;
 
-    public Friend(String fullName, String province, String city, String userId, String birthday, String loveTime, String sex) {
-        this(fullName, province, city, userId, birthday, loveTime, sex, null);
+    public Friend(String fullName, String province, String city, String userId, String birthday,boolean chineseDate,
+                  String loveTime, String sex) {
+        this(fullName, province, city, userId, birthday,chineseDate, loveTime, sex, null);
     }
 
-    public Friend(String fullName, String province, String city, String userId, String birthday, String loveTime, String sex, String templateId) {
+    public Friend(String fullName, String province, String city, String userId, String birthday,boolean chineseDate,
+                  String loveTime, String sex, String templateId) {
         this.fullName = fullName;
         this.howOld = age(DateUtil.parse(birthday), new Date());
         this.province = province;
         this.city = city;
         this.userId = userId;
         this.birthday = birthday;
+        this.chineseDate=chineseDate;
         this.loveTime = loveTime;
         this.sex = sex;
         this.templateId = templateId;
@@ -73,6 +77,10 @@ public class Friend {
         return birthday;
     }
 
+    public boolean isChineseDate() {
+        return chineseDate;
+    }
+
     public String getLoveTime() {
         return loveTime;
     }
@@ -90,7 +98,21 @@ public class Friend {
     }
 
     public String getNextBirthdayDays() {
-        return getNextDay(DateUtil.parse(birthday));
+        if(chineseDate){
+            LocalDateTime localDateTime=LocalDateTime.now();
+            Date date = DateUtil.parse(birthday);
+            int month=DateUtil.month(date)+1;
+            int day=DateUtil.dayOfMonth(date);
+            ChineseDate chineseDate=new ChineseDate(localDateTime.getYear(),month,day);
+            if(chineseDate.getGregorianDate().getTime()-DateUtil.date().getTime()<0){
+                chineseDate=new ChineseDate(localDateTime.getYear()+1,month,day);
+                return getNextDay(new DateTime(chineseDate.getGregorianDate()));
+            }else{
+                return getNextDay(new DateTime(chineseDate.getGregorianDate()));
+            }
+        }else{
+            return getNextDay(DateUtil.parse(birthday));
+        }
     }
 
     public String getNextMemorialDay() {
@@ -106,5 +128,6 @@ public class Friend {
         }
         return String.valueOf(dateTime.between(now, DateUnit.DAY));
     }
+
 
 }
