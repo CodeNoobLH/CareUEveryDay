@@ -98,21 +98,25 @@ public class Friend {
     }
 
     public String getNextBirthdayDays() {
+        String nextBirthday="";
+        Date date = DateUtil.parse(birthday);
+        int month=DateUtil.month(date)+1;
+        int day=DateUtil.dayOfMonth(date);
+        String birth=month+"月"+day+"日";
         if(chineseDate){
             LocalDateTime localDateTime=LocalDateTime.now();
-            Date date = DateUtil.parse(birthday);
-            int month=DateUtil.month(date)+1;
-            int day=DateUtil.dayOfMonth(date);
             ChineseDate chineseDate=new ChineseDate(localDateTime.getYear(),month,day);
+            birth=chineseDate.getChineseMonthName()+chineseDate.getChineseDay();
             if(chineseDate.getGregorianDate().getTime()-DateUtil.date().getTime()<0){
                 chineseDate=new ChineseDate(localDateTime.getYear()+1,month,day);
-                return getNextDay(new DateTime(chineseDate.getGregorianDate()));
+                nextBirthday=getNextDay(new DateTime(chineseDate.getGregorianDate()));
             }else{
-                return getNextDay(new DateTime(chineseDate.getGregorianDate()));
+                nextBirthday=getNextDay(new DateTime(chineseDate.getGregorianDate()));
             }
         }else{
-            return getNextDay(DateUtil.parse(birthday));
+            nextBirthday=getNextDay(DateUtil.parse(birthday));
         }
+        return nextBirthday+"("+birth+")";
     }
 
     public String getNextMemorialDay() {
